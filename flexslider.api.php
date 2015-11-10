@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API documentation for FlexSlider
@@ -22,12 +21,12 @@ flexslider_add('my_image_list', 'default');
 /**
  * You also have the option of skipping the option set parameter if you want
  * to run with the library defaults or plan on adding the settings array
- * into the page manually using drupal_add_js().
+ * into the page manually using backdrop_add_js().
  */
 flexslider_add('my_image_list');
 
 /**
- * Finally, you can simply have Drupal include the library in the list of
+ * Finally, you can simply have Backdrop include the library in the list of
  * javascript libraries. This method would assume you would take care of
  * initializing a FlexSlider instance in your theme or custom javascript
  * file.

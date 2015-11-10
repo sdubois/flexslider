@@ -118,6 +118,25 @@ function flexslider_permission() {
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function flexslider_config_info() {
+  // If there are a large number of configuration files prefixed with this
+  // string, provide a "name_key" that will be read from the configuration file
+  // and used when listing the configuration file.
+  $prefixes['flexslider.slider'] = array(
+    'name_key' => 'name',
+    'label_key' => 'title',
+    'group' => t('FlexSlider'),
+  );
+  $prefixes['flexslider.settings'] = array(
+    'label' => t('Flexslider Settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_menu().
  */
 function flexslider_menu() {

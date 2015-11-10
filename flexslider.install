@@ -119,102 +119,11 @@ function flexslider_requirements($phase) {
 /**
  * Implements hook_update_N().
  *
- * Remove/Update table fields to better suit FlexSlider
+ * Update variables to config.
  */
-function flexslider_update_7001(&$sandbox) {
-  $field_new = array(
-    'description' => 'The image style for normal images.',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => TRUE,
-    'default' => 'flexslider_full',
-  );
-  // Change the default image style
-  db_change_field('flexslider_optionset', 'imagestyle_normal', $field_new, array());
-  // Drop the unused table column
-  db_drop_field('flexslider_optionset', 'imagestyle_thumb');
+function flexslider_update_1000(&$sandbox) {
+  // Migrate variables to config.
+  config_set('flexslider.settings', 'debug', update_variable_get('flexslider_debug', FALSE));
+  // Delete variables.
+  update_variable_del('flexslider_debug');
 }
-
-/**
- * Implements hook_update_N().
- *
- * Enables the Image module since it is now explicitly listed as a
- * dependency.
- */
-function flexslider_update_7002(&$sandbox) {
-  module_enable(array('image'));
-}
-
-/**
- * Implements hook_update_N().
- *
- * Migrate settings from FlexSlider v1 to v2
- */
-function flexslider_update_7200(&$sandbox) {
-  $t = get_t();
-  
-  module_load_include('module', 'flexslider', 'flexslider');
-  $optionsets = flexslider_optionset_load_all();
-
-  foreach ($optionsets as $optionset) {
-    // Map old options to new keys/values
-    $optionset->options['animationSpeed'] = $optionset->options['animationDuration'];
-    $optionset->options['direction'] = $optionset->options['slidedirection'];
-    $optionset->options['keyboard'] = $optionset->options['keyboardnav'];
-    $optionset->options['startAt'] = $optionset->options['slidetostart'];
-    $optionset->options['start'] = $optionset->options['startCallback'];
-    $optionset->options['before'] = $optionset->options['beforeCallback'];
-    $optionset->options['after'] = $optionset->options['afterCallback'];
-    $optionset->options['end'] = $optionset->options['endCallback'];
-
-    // Delete any options which no longer exist
-    unset($optionset->options['animationDuration']);
-    unset($optionset->options['slidedirection']);
-    unset($optionset->options['keyboardnav']);
-    unset($optionset->options['startCallback']);
-    unset($optionset->options['beforeCallback']);
-    unset($optionset->options['afterCallback']);
-    unset($optionset->options['endCallback']);
-    unset($optionset->options['controlsContainer']); // This value changed in the new version. We have to reset it to the default value
-
-    // Merge in defaults for new options
-    $optionset->options += _flexslider_optionset_defaults();
-
-    // Save the updated optionset
-    flexslider_optionset_save($optionset);
-  }
-  drupal_set_message($t('Optionsets migrated. However it is recommended to go validate all your settings manually. Especially if you have callback functions defined. They may reference functions which no longer exist.'), 'warning');
-}
-
-function flexslider_update_7201(&$sandbox) {
-  $field_new = array(
-    'description' => 'The image style for thumbnail images.',
-    'type' => 'varchar',
-    'length' => 255,
-    'not null' => TRUE,
-    'default' => 'flexslider_thumbnail',
-  );
-  // Change the default image style
-  db_add_field('flexslider_optionset', 'imagestyle_thumbnail', $field_new, array());
-}
-
-/**
- * Implements hook_update_N().
- *
- * Remove the image style settings from the optionset
- */
-function flexslider_update_7202(&$sandbox) {
-  db_drop_field('flexslider_optionset', 'imagestyle_normal');
-  db_drop_field('flexslider_optionset', 'imagestyle_thumbnail');
-}
-
-/**
- * Implements hook_update_N().
- *
- * Remove the flexslider_version variable.
- */
-function flexslider_update_7203(&$sandbox) {
-  variable_del('flexslider_version');
-}
-
-// @todo add hook_update_N function to migrate old option set data to new values

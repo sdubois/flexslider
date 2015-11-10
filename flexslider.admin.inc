@@ -483,22 +483,32 @@ function flexslider_form_settings() {
   );
 
   // Debug mode toggle
-  $form['library']['flexslider_debug'] = array(
+  $form['library']['debug'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable debug mode'),
     '#description' => t('Load the human-readable version of the FlexSlider library.'),
-    '#default_value' => variable_get('flexslider_debug', FALSE),
+    '#default_value' => config_get('flexslider.settings', 'debug'),
     '#access' => user_access('administer flexslider'),
   );
 
-  return system_settings_form($form);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
 }
 
 /**
  * Submit handler for the advanced module settings.
  */
 function flexslider_form_settings_submit($form, &$form_state) {
-  // Do nothing for now
+  // Save to config.
+  if (isset($form_state['values']['debug'])) {
+    config_set('flexslider.settings', 'debug', $form_state['values']['debug']);
+  }
+  // Set a friendly message.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
