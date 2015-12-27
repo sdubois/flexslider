@@ -5,58 +5,6 @@
  */
 
 /**
- * Implements hook_schema().
- */
-function flexslider_schema() {
-  $schema = array();
-
-  $schema['flexslider_optionset'] = array(
-    'description' => 'Store option sets for flexslider instances.',
-    'export' => array(
-      'key' => 'name',
-      'identifier' => 'preset',
-      'default hook' => 'flexslider_default_presets',
-      'api' => array(
-        'owner' => 'flexslider',
-        'api' => 'flexslider_default_preset',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'name' => array(
-        'description' => 'The machine-readable option set name.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'title' => array(
-        'description' => 'The human-readable title for this option set.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-      ),
-      'theme' => array(
-        'description' => 'The flexslider theme.',
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => 'classic',
-      ),
-      'options' => array(
-        'description' => 'The options array.',
-        'type' => 'blob',
-        'size' => 'big',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('name'),
-  );
-
-  return $schema;
-}
-
-/**
  * Implements hook_install().
  *
  * Adds a 'default' option set for fresh installs.
@@ -69,8 +17,7 @@ function flexslider_install() {
  * Implements hook_uninstall().
  */
 function flexslider_uninstall() {
-  variable_del('flexslider_debug');
-  variable_del('flexslider_version');
+  // Do nothing for now
 }
 
 /**
