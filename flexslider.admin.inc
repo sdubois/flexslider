@@ -5,20 +5,94 @@
  */
 
 /**
- * Submit handler for adding a new option set.
+ * Form builder: Form for advanced settings.
  */
-function flexslider_form_optionset_add_submit($form, &$form_state) {
-  $optionset = flexslider_optionset_create(array('name' => $form_state['values']['name'], 'title' => $form_state['values']['title']));
+function flexslider_form_settings() {
+  $form = array();
 
-  $saved = flexslider_optionset_save($optionset, TRUE);
+  $form['library'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Library',
+  );
 
-  if ($saved) {
-    drupal_set_message(t('Option set %name was created.', array('%name' => $optionset->name)));
-    $form_state['redirect'] = 'admin/config/media/flexslider/edit/' . $optionset->name;
+  // Debug mode toggle.
+  $form['library']['debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable debug mode'),
+    '#description' => t('Load the human-readable version of the FlexSlider library.'),
+    '#default_value' => config_get('flexslider.settings', 'debug'),
+    '#access' => user_access('administer flexslider'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for the advanced module settings.
+ */
+function flexslider_form_settings_submit($form, &$form_state) {
+  // Save to config.
+  if (isset($form_state['values']['debug'])) {
+    config_set('flexslider.settings', 'debug', $form_state['values']['debug']);
   }
-  else {
-    drupal_set_message(t('Failed to create option set. Please verify your settings.'), 'error');
+  // Set a friendly message.
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Callback function for flexSlider optionset list.
+ */
+function flexslider_optionset_list() {
+  $header = array(
+    array('data' => t('Title')),
+    array('data' => t('Machine Name')),
+    array('data' => t('Storage State')),
+    array('data' => t('Operations')),
+  );
+
+  $storage_states = array(
+    FLEXSLIDER_STORAGE_DEFAULT => t('Default (module-provided)'),
+    FLEXSLIDER_STORAGE_OVERRIDDEN => t('Overridden'),
+    FLEXSLIDER_STORAGE_CUSTOM => t('Custom'),
+  );
+
+  $optionsets = flexslider_optionset_load_all();
+  $rows = array();
+  foreach ($optionsets as $optionset) {
+    $row = array();
+    $row[] = array(
+      'data' => check_plain($optionset['title']),
+    );
+    $row[] = array(
+      'data' => check_plain($optionset['name']),
+    );
+    $row[] = array(
+      'data' => $storage_states[$optionset['storage']],
+    );
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => _flexslider_get_operations($optionset),
+      ),
+    );
+
+    $rows[] = array(
+      'data' => $row,
+    );
   }
+
+  $table = array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No flexslider optionsets found.'),
+  );
+
+  return theme('table', $table);
 }
 
 /**
@@ -26,6 +100,7 @@ function flexslider_form_optionset_add_submit($form, &$form_state) {
  *
  * @param array $options [optional]
  *  Pass in a set of default values for the options
+ *
  * @return array
  *  Returns the option set array
  */
@@ -40,34 +115,35 @@ function flexslider_option_elements($options = array()) {
 
   $form['animation_slideshow']['animation'] = array(
     '#type' => 'select',
-    '#title' => t('Animation'),
-    '#description' => t('Select your animation type'),
+    '#title' => t('Animation Type'),
     '#options' => array(
       'fade'   => t('Fade'),
       'slide'  => t('Slide'),
     ),
     '#default_value' => isset($options['animation']) ? $options['animation'] : _flexslider_optionset_defaults('animation'),
-    // @todo add states to enable/disable the direction
-  );
-
-  $form['animation_slideshow']['animationSpeed'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Animation Speed'),
-    '#description' => t('Set the speed of animations, in milliseconds'),
-    '#element_validate' => array('_flexslider_validate_positive_integer'),
-    '#default_value' => isset($options['animationSpeed']) ? $options['animationSpeed'] : _flexslider_optionset_defaults('animationSpeed'),
-    '#size' => 30,
   );
 
   $form['animation_slideshow']['direction'] = array(
     '#type' => 'select',
     '#title' => t('Slide Direction'),
-    '#description' => t('Select the sliding direction, "horizontal" or "vertical"'),
     '#options' => array(
       'horizontal'   => t('Horizontal'),
       'vertical'  => t('Vertical'),
     ),
     '#default_value' =>  isset($options['direction']) ? $options['direction'] : _flexslider_optionset_defaults('direction'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="animation"]' => array('value' => 'slide'),
+      ),
+    ),
+  );
+
+  $form['animation_slideshow']['animationSpeed'] = array(
+    '#type' => 'number',
+    '#title' => t('Animation Speed'),
+    '#field_suffix' => t('milliseconds'),
+    '#element_validate' => array('_flexslider_validate_positive_integer'),
+    '#default_value' => isset($options['animationSpeed']) ? $options['animationSpeed'] : _flexslider_optionset_defaults('animationSpeed'),
   );
 
   $form['animation_slideshow']['slideshow'] = array(
@@ -81,7 +157,6 @@ function flexslider_option_elements($options = array()) {
   $easing_options = array('swing' => t('Swing'), 'linear' => t('Linear'));
   if (module_exists('jqeasing')) {
     $easing_options = array_merge($easing_options, _flexslider_jqeasing_options());
-    
   }
 
   $form['animation_slideshow']['easing'] = array(
@@ -275,7 +350,6 @@ function flexslider_option_elements($options = array()) {
     '#description' => t('Prefix string attached to the classes of all elements generated by the plugin.'),
     '#size' => 40,
     '#maxlength' => 255,
-    '#element_validate' => array('_flexslider_validate_namespace'),
     '#default_value' => isset($options['namespace']) ? $options['namespace'] : _flexslider_optionset_defaults('namespace'),
   );
   $form['advanced']['selector'] = array(
@@ -284,7 +358,6 @@ function flexslider_option_elements($options = array()) {
     '#description' => t('Must match a simple pattern. "{container} > {slide}".'),
     '#size' => 40,
     '#maxlength' => 255,
-    '#element_validate' => array('_flexslider_validate_selector'),
     '#default_value' => isset($options['selector']) ? $options['selector'] : _flexslider_optionset_defaults('selector'),
   );
   $form['advanced']['sync'] = array(
@@ -373,25 +446,24 @@ function flexslider_option_elements($options = array()) {
 }
 
 /**
- * Form builder; Form to edit a given option set.
+ * Form builder: Form to add or edit an option set.
  */
-function flexslider_form_optionset_edit($form, &$form_state) {
-
-  if (empty($form_state['optionset'])) {
-    $optionset = flexslider_optionset_create();
-  }
-  else {
+function flexslider_form_optionset_edit($form, &$form_state, $optionset = array()) {
+  // If the form has failed validation, don't loose the changes.
+  if (!empty($form_state['optionset'])) {
     $optionset = $form_state['optionset'];
   }
+  if (empty($optionset)) {
+    $optionset = flexslider_optionset_create();
+  }
 
-  // Title
   $form['title'] = array(
     '#type' => 'textfield',
     '#maxlength' => '255',
     '#title' => t('Title'),
     '#description' => t('A human-readable title for this option set.'),
     '#required' => TRUE,
-    '#default_value' => $optionset->title,
+    '#default_value' => $optionset['title'],
   );
   $form['name'] = array(
     '#type' => 'machine_name',
@@ -401,7 +473,11 @@ function flexslider_form_optionset_edit($form, &$form_state) {
       'exists' => 'flexslider_optionset_exists',
     ),
     '#required' => TRUE,
-    '#default_value' => $optionset->name,
+    '#default_value' => $optionset['name'],
+  );
+  $form['module'] = array(
+    '#type' => 'value',
+    '#default_value' => isset($optionset['module']) ? $optionset['module'] : NULL,
   );
 
   // Options Vertical Tab Group table
@@ -409,13 +485,62 @@ function flexslider_form_optionset_edit($form, &$form_state) {
     '#type' => 'vertical_tabs',
   );
 
-  $default_options = flexslider_option_elements($optionset->options);
+  $default_options = flexslider_option_elements($optionset['options']);
+
   // Add the options to the vertical tabs section
   foreach ($default_options as $value) {
     $form['options'][] = $value;
   }
 
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
   return $form;
+}
+
+/**
+ * Submit handler for optionset add/edit form.
+ */
+function flexslider_form_optionset_edit_submit($form, &$form_state) {
+  // Redirect to list page.
+  $form_state['redirect'] = 'admin/config/media/flexslider';
+
+  $values = $form_state['values'];
+
+  // Build a base optionset.
+  $optionset = array(
+    'name' => $values['name'],
+    'title' => $values['title'],
+    'options' => array(),
+  );
+  if ($values['module'] != NULL) {
+    $optionset['module'] = $values['module'];
+  }
+
+  // Remove base items from options.
+  unset($values['name']);
+  unset($values['title']);
+  // Remove form elements from config.
+  unset($values['submit']);
+  unset($values['form_build_id']);
+  unset($values['form_token']);
+  unset($values['form_id']);
+  unset($values['op']);
+  // Remove storage state, must be computed.
+  unset($values['storage']);
+
+  // All other options should be saved in 'options' key.
+  foreach ($values as $key => $value) {
+    $optionset['options'][$key] = $value;
+  }
+
+  // Save to config.
+  flexslider_optionset_save($optionset);
+
+  // Set a friendly message.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -429,110 +554,48 @@ function _flexslider_validate_positive_integer($element, &$form_state) {
 }
 
 /**
- * Validate a form element that should have a number as value.
- */
-function _flexslider_validate_number($element, &$form_state) {
-  $value = $element['#value'];
-  if ($value !== '' && !is_numeric($value)) {
-    form_error($element, t('%name must be a number.', array('%name' => $element['#option_name'])));
-  }
-}
-
-/**
  * Form builder; Form to delete a given option set.
  */
 function flexslider_optionset_form_delete($form, &$form_state, $optionset) {
   $form_state['optionset'] = &$optionset;
 
   // Deleting an export in code will revert it.
-  $op = ($optionset->export_type & EXPORT_IN_CODE) ? 'Revert' : 'Delete';
+  $op = (isset($optionset['overridden']) && $optionset['overridden']) ? 'Revert' : 'Delete';
 
-  return confirm_form(
-    $form,
-    t('Are you sure you want to @action the option set %name?', array('@action' => t(drupal_strtolower($op)), '%name' => $optionset->name)),
-    'admin/config/media/flexslider',
-    NULL,
-    t($op),  t('Cancel')
-  );
+  $question = t('Are you sure you want to @action the option set %name?', array('@action' => t(backdrop_strtolower($op)), '%name' => $optionset['name']));
+  $path = 'admin/config/media/flexslider';
+  $description = NULL;
+
+  return confirm_form($form, $question, $path, $description, t($op), t('Cancel'));
 }
 
 /**
- * Submit handler for deleting an option set.
+ * Submit handler for deleting (or reverting) an optionset.
  */
 function flexslider_optionset_form_delete_submit($form, &$form_state) {
   $optionset = &$form_state['optionset'];
-  $op = ($optionset->export_type & EXPORT_IN_CODE) ? 'reverted' : 'deleted';
 
-  ctools_include('export');
-  ctools_export_crud_delete('flexslider_optionset', $optionset);
-
-  drupal_set_message(t('Option set %name was ' . $op . '.', array('%name' => $optionset->name)));
-  $form_state['redirect'] = 'admin/config/media/flexslider';
-}
-
-
-/**
- * Form builder; Form for advanced module settings.
- */
-function flexslider_form_settings() {
-  $form = array();
-
-  $form['library'] = array(
-    '#type' => 'fieldset',
-    '#title' => 'Library',
-  );
-
-  // Debug mode toggle
-  $form['library']['debug'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable debug mode'),
-    '#description' => t('Load the human-readable version of the FlexSlider library.'),
-    '#default_value' => config_get('flexslider.settings', 'debug'),
-    '#access' => user_access('administer flexslider'),
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for the advanced module settings.
- */
-function flexslider_form_settings_submit($form, &$form_state) {
-  // Save to config.
-  if (isset($form_state['values']['debug'])) {
-    config_set('flexslider.settings', 'debug', $form_state['values']['debug']);
+  if (isset($optionset['overridden']) && $optionset['overridden']) {
+    $op = 'reverted';
+    flexslider_optionset_revert($optionset);
   }
-  // Set a friendly message.
-  backdrop_set_message(t('The configuration options have been saved.'));
-}
+  else {
+    $op = 'deleted';
+    flexslider_optionset_delete($optionset);
+  }
 
-/**
- * Validation functions
- */
-function _flexslider_validate_namespace($element, &$form_state) {
-  // @todo
-  // @see form_error()
-  return TRUE;
-}
-
-function _flexslider_validate_selector($element, &$form_state) {
-  // @todo
-  // @see form_error()
-  return TRUE;
+  backdrop_set_message(t('Option set %name was ' . $op . '.', array('%name' => $optionset['name'])));
+  $form_state['redirect'] = 'admin/config/media/flexslider';
 }
 
 /**
  * Validate a form element that should have a number as value.
  */
 function _flexslider_validate_minimum_version_22($element, &$form_state) {
+  /* @todo
   $lib = libraries_detect('flexslider');
   if (!isset($lib['version'])) {
-    drupal_set_message(t('Unable to detect FlexSlider library version. Some options may not function properly. Please review the README.md file for installation instructions.'), 'warning');
+    backdrop_set_message(t('Unable to detect FlexSlider library version. Some options may not function properly. Please review the README.md file for installation instructions.'), 'warning');
   }
   else {
     $version = $lib['version'];
@@ -545,4 +608,35 @@ function _flexslider_validate_minimum_version_22($element, &$form_state) {
       )));
     }
   }
+  */
+}
+
+/**
+ * Given a view, return a list of operations that can be performed on it.
+ */
+function _flexslider_get_operations($optionset) {
+  $links = array();
+
+  $links['edit'] = array(
+    'title' => t('Edit'),
+    'href' => 'admin/config/media/flexslider/edit/' . $optionset['name'],
+  );
+  $links['clone'] = array(
+    'title' => t('Clone'),
+    'href' => 'admin/config/media/flexslider/clone/' . $optionset['name'],
+  );
+  if ($optionset['storage'] == FLEXSLIDER_STORAGE_DEFAULT) {
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/config/media/flexslider/delete/' . $optionset['name'],
+    );
+  }
+  elseif ($optionset['storage'] == FLEXSLIDER_STORAGE_OVERRIDDEN) {
+    $links['revert'] = array(
+      'title' => t('Revert'),
+      'href' => 'admin/config/media/flexslider/revert/' . $optionset['name'],
+    );
+  }
+
+  return $links;
 }

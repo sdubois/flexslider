@@ -1,11 +1,14 @@
 <?php
 /**
  * @file
- * A light-weight, customizable image gallery plugin for Drupal based on jQuery
+ * A light-weight, customizable image gallery plugin for Backdrop based on jQuery
  */
 
 define("FLEXSLIDER_COMPATIBLE_MAJOR_VERSION", '2');
-define("FLEXSLIDER_DEBUG", variable_get('flexslider_debug', FALSE));
+define("FLEXSLIDER_DEBUG", config_get('flexslider.settings', 'debug'));
+define('FLEXSLIDER_STORAGE_CUSTOM', 'custom');
+define('FLEXSLIDER_STORAGE_DEFAULT', 'default');
+define('FLEXSLIDER_STORAGE_OVERRIDDEN', 'overridden');
 
 /**
  * Implements hook_libraries_info().
@@ -64,7 +67,7 @@ function flexslider_libraries_info_alter(&$libraries) {
  * We also define FlexSlider through the core library callbacks
  */
 function flexslider_library() {
-  $module_path = drupal_get_path('module', 'flexslider');
+  $module_path = backdrop_get_path('module', 'flexslider');
   $library = libraries_detect('flexslider');
 
   $libraries['flexslider'] = array(
@@ -124,7 +127,7 @@ function flexslider_config_info() {
   // If there are a large number of configuration files prefixed with this
   // string, provide a "name_key" that will be read from the configuration file
   // and used when listing the configuration file.
-  $prefixes['flexslider.slider'] = array(
+  $prefixes['flexslider.optionset'] = array(
     'name_key' => 'name',
     'label_key' => 'title',
     'group' => t('FlexSlider'),
@@ -142,33 +145,72 @@ function flexslider_config_info() {
 function flexslider_menu() {
   $items = array();
 
-  $items['admin/config/media/flexslider/advanced'] = array(
-    'title' => 'Advanced settings',
-    'description' => 'Configure the advanced flexslider module settings.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('flexslider_form_settings'),
+  // Minor code reduction technique.
+  $base = array(
+    'access callback' => 'user_access',
     'access arguments' => array('administer flexslider'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
     'file' => 'flexslider.admin.inc',
   );
 
-  return $items;
-}
+  $items['admin/config/media/flexslider'] = array(
+    'title' => 'FlexSlider',
+    'description' => 'Flexslider Optionset List',
+    'page callback' => 'flexslider_optionset_list',
+  ) + $base;
 
-/**
- * Implements hook_help().
- */
-function flexslider_help($path, $arg) {
-  switch ($path) {
-    case 'admin/config/media/flexslider/edit/%':
-      return
-          '<p>'
-        . t('An <em>option set</em> defines exactly how a flexslider image gallery looks like on your site. '
-          . 'It is s a combination of <a href="@styles">image styles</a> for the various image sizes and FlexSlider library options.', array('@styles' => url('admin/config/media/image-styles'))) . '<br />'
-        . t('For a full documentation of all options, refer to the official @docs.', array('@docs' => l(t('FlexSlider documentation'), 'http://www.woothemes.com/flexslider/')))
-        . '</p>';
-  }
+  $items['admin/config/media/flexslider/advanced'] = array(
+    'title' => 'Advanced settings',
+    'description' => 'Configure the advanced flexslider module settings.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_form_settings'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  ) + $base;
+
+  $items['admin/config/media/flexslider/list'] = array(
+    'title' => 'Optionset List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['admin/config/media/flexslider/add'] = array(
+    'title' => 'Add Optionset',
+    'description' => 'Add a FlexSlider Optionset',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_form_optionset_edit'),
+    'type' => MENU_LOCAL_ACTION,
+  ) + $base;
+
+  $items['admin/config/media/flexslider/edit/%flexslider_optionset'] = array(
+    'title' => 'Edit optionset',
+    'description' => 'Edit a Flexslider optionset',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_form_optionset_edit', 5),
+    'weight' => -10,
+  ) + $base;
+
+  $items['admin/config/media/flexslider/clone/%flexslider_optionset'] = array(
+    'title' => 'Clone optionset',
+    'description' => 'Clone a Flexslider optionset',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_clone_form', 5),
+  ) + $base;
+
+  $items['admin/config/media/flexslider/delete/%flexslider_optionset'] = array(
+    'title' => 'Delete optionset',
+    'description' => 'Delete a Flexslider optionset',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_optionset_form_delete', 5),
+  ) + $base;
+
+  $items['admin/config/media/flexslider/revert/%flexslider_optionset'] = array(
+    'title' => 'Revert style',
+    'description' => 'Revert an image style.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('flexslider_optionset_form_delete', 5),
+  ) + $base;
+
+  return $items;
 }
 
 /**
@@ -182,13 +224,13 @@ function flexslider_theme() {
       'template' => 'theme/flexslider',
       'file' => 'theme/flexslider.theme.inc',
     ),
-    
+
     // Slide container
     'flexslider_list' => array(
       'variables' => array('items' => array(), 'settings' => array()),
       'file' => 'theme/flexslider.theme.inc',
     ),
-    
+
     // Slide item
     'flexslider_list_item' => array(
       'variables' => array('item' => array(), 'settings' => array(), 'caption' => ''),
@@ -228,155 +270,6 @@ function flexslider_image_default_styles() {
   return $styles;
 }
 
-/**
- * Implements hook_ctools_plugin_api().
- */
-function flexslider_ctools_plugin_api($owner, $api) {
-  if ($owner == 'flexslider' && $api == 'flexslider_default_preset') {
-    return array('version' => 1);
-  }
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function flexslider_ctools_plugin_directory($module, $type) {
-  if ($type == 'export_ui') {
-    return 'plugins/export_ui';
-  }
-}
-
-/**
- * Create a new optionset object
- *
- * Note that this function does not save the optionset to the database.
- * @see flexslider_optionset_save()
- */
-function flexslider_optionset_create($values = array()) {
-  ctools_include('export');
-  $optionset = ctools_export_crud_new('flexslider_optionset');
-
-  // Set the options to an array
-  $optionset->options = array();
-
-  // Assign specified values
-  if (isset($values['name'])) {
-    $optionset->name = $values['name'];
-  }
-  if (isset($values['title'])) {
-    $optionset->title = $values['title'];
-  }
-  if (isset($values['options']) and is_array($values['options'])) {
-    $optionset->options = $values['options'];
-  }
-
-  // Merge default settings with any given settings
-  $optionset_defaults = _flexslider_optionset_defaults();
-  $optionset->options = $optionset_defaults += $optionset->options;
-
-  return $optionset;
-}
-
-/**
- * Fetches all option sets from the database and returns them as an associative array.
- */
-function flexslider_optionset_load_all() {
-  ctools_include('export');
-  $optionsets = ctools_export_crud_load_all('flexslider_optionset');
-  foreach ($optionsets as $optionset) {
-    // Ensure the optionset is typecast after being loaded from DB
-    _flexslider_typecast_optionset($optionset->options);
-  }
-  return $optionsets;
-}
-
-/**
- * Fetches the given option set and returns it as an object or NULL, if no set could be found.
- */
-function flexslider_optionset_load($optionset_name) {
-  ctools_include('export');
-  $optionset = ctools_export_crud_load('flexslider_optionset', $optionset_name);
-    // Ensure the optionset is typecast after being loaded from DB
-  _flexslider_typecast_optionset($optionset->options);
-  return $optionset;
-}
-
-/**
- * Checks whether an option set with the given name already exists.
- */
-function flexslider_optionset_exists($optionset_name) {
-  ctools_include('export');
-  $optionset = ctools_export_crud_load('flexslider_optionset', $optionset_name);
-  return isset($optionset->name);
-}
-
-/**
- * Saves the given option set to the database.
- * Set the $new flag if this set has not been written before.
- *
- * @return object|boolean
- *  Returns the newly saved object, FALSE otherwise.
- */
-function flexslider_optionset_save($optionset, $new = FALSE) {
-  // If the machine name is missing or already in use, return an error.
-  if (empty($optionset->name) or (FALSE != flexslider_optionset_exists($optionset->name) and $new)) {
-    return FALSE;
-  }
-
-  // Check for an invalid list of options
-  if (isset($optionset->options) and !is_array($optionset->options)) {
-    return FALSE;
-  }
-
-
-  // If the title is missing, default to the name
-  if (empty($optionset->title)) {
-    $optionset->title = $optionset->name;
-  }
-
-  // Merge default settings with any given settings
-  $optionset_defaults = _flexslider_optionset_defaults();
-  $optionset->options = $optionset_defaults += $optionset->options;
-
-  // Prepare the database values.
-  $db_values = array(
-    'name' => $optionset->name,
-    'title' => $optionset->title,
-    'options' => _flexslider_typecast_optionset($optionset->options),
-  );
-
-  if ($new) {
-    $result = drupal_write_record('flexslider_optionset', $db_values);
-  }
-  else {
-    $result = drupal_write_record('flexslider_optionset', $db_values, 'name');
-  }
-
-  // Return the object if the values were saved successfully.
-  if (($new and SAVED_NEW == $result) or (!$new and SAVED_UPDATED == $result)) {
-    return $optionset;
-  }
-
-  // Otherwise, an error occurred
-  return FALSE;
-}
-
-/**
- * Deletes the given option set from the database.
- *
- * @param object|string $optionset
- *  Optionset object or machine name
- */
-function flexslider_optionset_delete($optionset) {
-  if (isset($optionset->name)) {
-    $name = $optionset->name;
-  }
-  else {
-    $name = $optionset;
-  }
-  db_delete('flexslider_optionset')->condition('name', $name)->execute();
-}
-
 /*
  * This function loads the required JavaScripts and settings for a flexslider
  * instance.
@@ -384,7 +277,7 @@ function flexslider_optionset_delete($optionset) {
  * @param string $id [optional]
  *  ID Attribute for FlexSlider container
  * @param object|strong $optionset [optional]
- *  Option set to load or the machine name of an existing optionset
+ *  optionset to load or the machine name of an existing optionset
  */
 function flexslider_add($id = NULL, $optionset = NULL) {
   // Check optionset value
@@ -399,7 +292,7 @@ function flexslider_add($id = NULL, $optionset = NULL) {
 
   // Static array to remember which scripts are already attached.
   // @todo not currently in use
-  $cache = &drupal_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, array());
 
   // @todo investigate the best way to cache data loaded from libraries_load()
   libraries_load('flexslider');
@@ -411,7 +304,7 @@ function flexslider_add($id = NULL, $optionset = NULL) {
     $js_setting['optionsets'] = array(
       $optionset->name => $optionset->options,
     );
-    drupal_add_js(array('flexslider' => $js_setting), 'setting');
+    backdrop_add_js(array('flexslider' => $js_setting), 'setting');
   }
   
   if (!empty($id)) {
@@ -422,14 +315,14 @@ function flexslider_add($id = NULL, $optionset = NULL) {
       ),
     );
     // @todo add alter hook for optionset
-    drupal_add_js(array('flexslider' => $js_settings), 'setting');
+    backdrop_add_js(array('flexslider' => $js_settings), 'setting');
   }
   // Loader JavaScript
-  drupal_add_js(drupal_get_path('module', 'flexslider') . '/assets/js/flexslider.load.js', array('type' => 'file', 'scope' => 'footer'));
+  backdrop_add_js(backdrop_get_path('module', 'flexslider') . '/assets/js/flexslider.load.js', array('type' => 'file', 'scope' => 'footer'));
 }
 
 /**
- * Default settings for a newly created option set
+ * Default settings for a newly created optionset
  *
  * @param string $key [optional]
  *  Get specific default value
@@ -616,4 +509,214 @@ function _flexslider_jqeasing_options() {
     "easeOutBounce" => "easeOutBounce",
     "easeInOutBounce" => "easeInOutBounce",
   );
+}
+
+/**
+ * Checks whether an optionset with the given name already exists.
+ *
+ * @param $name
+ *   The name of the optionset.
+ *
+ * @return boolean
+ *   TRUE if it esists, FALSE if not.
+ */
+function flexslider_optionset_exists($name) {
+  return !config('flexslider.optionset.' . $name)->isNew();
+}
+
+/******************************************************************************
+ * Flexslider CRUD/R functions.
+ ******************************************************************************/
+
+/**
+ * Create a new optionset array.
+ *
+ * @param $values
+ *   Specified values for the optionset.
+ *
+ * @return array
+ *   Optionset array.
+ *
+ * @see flexslider_optionset_save()
+ */
+function flexslider_optionset_create($values = array()) {
+  // Stub the array for new custom optionsets.
+  $optionset = array(
+    'name' => '',
+    'title' => '',
+    'options' => array(),
+  );
+
+  // Assign specified values if provided.
+  if (isset($values['name'])) {
+    $optionset['name'] = $values['name'];
+  }
+
+  if (isset($values['title'])) {
+    $optionset['title'] = $values['title'];
+  }
+  else if (isset($values['name'])) {
+    $optionset['title'] = $values['name'];
+  }
+
+  $optionset_defaults = _flexslider_optionset_defaults();
+  if (isset($values['options']) and is_array($values['options'])) {
+    // Merge default settings with any given settings.
+    $optionset['options'] = array_merge($optionset_defaults, $values['options']);
+  }
+  else {
+    $optionset['options'] = $optionset_defaults;
+  }
+
+  // Determine the storage state.
+  if (isset($values['module'])) {
+    $optionset['module'] = $values['module'];
+    if (isset($values['overridden'])) {
+      $optionset['overridden'] = $values['overridden'];
+      $optionset['storage'] = FLEXSLIDER_STORAGE_OVERRIDDEN;
+    }
+    else {
+      $optionset['storage'] = FLEXSLIDER_STORAGE_DEFAULT;
+    }
+  }
+  else {
+    $optionset['storage'] = FLEXSLIDER_STORAGE_CUSTOM;
+  }
+
+  return $optionset;
+}
+
+/**
+ * Read: Fetches all optionsets.
+ *
+ * @return array
+ *   An associative array of optionset arrays.
+ *
+ * @see flexslider_optionset_create().
+ */
+function flexslider_optionset_load_all() {
+  $optionsets = array();
+  $configs = config_get_names_with_prefix('flexslider.optionset.');
+  foreach ($configs as $file) {
+    $config = config($file)->get();
+    $name = str_replace('flexslider.optionset.', '', $file);
+    $optionsets[$name] = flexslider_optionset_create($config);
+  }
+
+  return $optionsets;
+}
+
+/**
+ * Read: Fetches the given optionset and creates the settings array.
+ *
+ * @param $name
+ *   The name of the optionset.
+ *
+ * @return array|NULL
+ *   The Optionset array, or NULL if no set could be found.
+ *
+ * @see flexslider_optionset_create().
+ */
+function flexslider_optionset_load($name) {
+  $config = config('flexslider.optionset.' . $name);
+  if ($config) {
+    $options = $config->get(); // Get the whole optionset.
+    $optionset = flexslider_optionset_create($options);
+    return $optionset;
+  }
+
+  return NULL;
+}
+
+/**
+ * Saves the given optionset to config.
+ *
+ * @param $optionset
+ *   Array representing the Flexslider optionset.
+ *
+ * @return array|boolean
+ *  Returns the newly saved object, FALSE otherwise.
+ */
+function flexslider_optionset_save($optionset) {
+  // Check for an invalid list of options
+  if (isset($optionset['options']) and !is_array($optionset['options'])) {
+    return FALSE;
+  }
+
+  // If the title is missing, default to the name
+  if (empty($optionset['title'])) {
+    $optionset['title'] = $optionset['name'];
+  }
+
+  // Merge default settings with any given settings
+  $optionset_defaults = _flexslider_optionset_defaults();
+  $optionset['options'] = array_merge($optionset_defaults, $optionset['options']);
+
+  // Set storage state. Copied from how image module handles state.
+  if (isset($optionset['module'])) {
+    $optionset['overridden'] = TRUE;
+    $optionset['storage'] = isset($values['overridden']) ? FLEXSLIDER_STORAGE_OVERRIDDEN : FLEXSLIDER_STORAGE_DEFAULT;
+  }
+  else {
+    $optionset['storage'] = FLEXSLIDER_STORAGE_CUSTOM;
+  }
+
+  // Load and save the (new or updated) config file.
+  $config = config('flexslider.optionset.' . $optionset['name']);
+  foreach ($optionset as $key => $value) {
+    $config->set($key, $value);
+  }
+  $config->save();
+
+  // Return the object if the values were saved successfully.
+  return $optionset;
+}
+
+/**
+ * Deletes the given optionset from the database.
+ *
+ * @param array|string $optionset
+ *  Optionset array or machine name
+ */
+function flexslider_optionset_delete($optionset) {
+  if (isset($optionset['name'])) {
+    $name = $optionset['name'];
+  }
+  else {
+    $name = $optionset;
+  }
+
+  // Delete the config file.
+  $config = config('flexslider.optionset.' . $name);
+  $config->delete();
+}
+
+/**
+ * Revert the changes made to a default optionset.
+ *
+ * @param style
+ *   An image style array.
+ *
+ * @return
+ *   Boolean TRUE if the operation succeeded.
+ */
+function flexslider_optionset_revert($optionset) {
+  if (isset($optionset['name'])) {
+    $name = $optionset['name'];
+  }
+  else {
+    $name = $optionset;
+  }
+
+  if (isset($optionset['module'])) {
+    $module = $optionset['module'];
+  }
+  else {
+    $module = 'flexslider';
+  }
+
+  config('flexslider.optionset.' . $name)->delete();
+  config_install_default_config($module, 'flexslider.optionset.' . $name);
+
+  return TRUE;
 }
