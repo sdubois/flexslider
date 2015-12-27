@@ -1,11 +1,11 @@
 name = FlexSlider
-description = Integrate the FlexSlider 2 library with Drupal
+description = FlexSlider responsive slideshows.
 core = 7.x
 backdrop = 1.x
 package = FlexSlider
+type = module
 
 ; Dependencies
-dependencies[] = libraries (>=2.x)
 dependencies[] = image
 
 ; Files
