@@ -1,7 +1,7 @@
 (function($) {
 
   // Behavior to load FlexSlider
-  Drupal.behaviors.flexslider = {
+  Backdrop.behaviors.flexslider = {
     attach: function(context, settings) {
       var id;
       var sliders = [];

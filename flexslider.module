@@ -221,20 +221,20 @@ function flexslider_theme() {
     // Flexslider container
     'flexslider' => array(
       'variables' => array('items' => array(), 'settings' => array()),
-      'template' => 'theme/flexslider',
-      'file' => 'theme/flexslider.theme.inc',
+      'template' => 'templates/flexslider',
+      'file' => 'flexslider.theme.inc',
     ),
 
     // Slide container
     'flexslider_list' => array(
       'variables' => array('items' => array(), 'settings' => array()),
-      'file' => 'theme/flexslider.theme.inc',
+      'file' => 'flexslider.theme.inc',
     ),
 
     // Slide item
     'flexslider_list_item' => array(
       'variables' => array('item' => array(), 'settings' => array(), 'caption' => ''),
-      'file' => 'theme/flexslider.theme.inc',
+      'file' => 'flexslider.theme.inc',
     ),
   );
 }
@@ -294,15 +294,12 @@ function flexslider_add($id = NULL, $optionset = NULL) {
   // @todo not currently in use
   $cache = &backdrop_static(__FUNCTION__, array());
 
-  // @todo investigate the best way to cache data loaded from libraries_load()
-  libraries_load('flexslider');
-
   // If the ID or optionset aren't set, it is assumed the settings will be set
   // manually via the calling module/theme
-  if (!empty($optionset) && !in_array($optionset->name, $cache)) {
-    $cache[] = $optionset->name;
+  if (!empty($optionset) && !in_array($optionset['name'], $cache)) {
+    $cache[] = $optionset['name'];
     $js_setting['optionsets'] = array(
-      $optionset->name => $optionset->options,
+      $optionset['name'] => $optionset['options'],
     );
     backdrop_add_js(array('flexslider' => $js_setting), 'setting');
   }
@@ -311,13 +308,13 @@ function flexslider_add($id = NULL, $optionset = NULL) {
     // JavaScript settings
     $js_settings = array(
       'instances' => array(
-        $id => $optionset->name,
+        $id => $optionset['name'],
       ),
     );
     // @todo add alter hook for optionset
     backdrop_add_js(array('flexslider' => $js_settings), 'setting');
   }
-  // Loader JavaScript
+  // Load JavaScript
   backdrop_add_js(backdrop_get_path('module', 'flexslider') . '/assets/js/flexslider.load.js', array('type' => 'file', 'scope' => 'footer'));
 }
 
@@ -587,26 +584,6 @@ function flexslider_optionset_create($values = array()) {
 }
 
 /**
- * Read: Fetches all optionsets.
- *
- * @return array
- *   An associative array of optionset arrays.
- *
- * @see flexslider_optionset_create().
- */
-function flexslider_optionset_load_all() {
-  $optionsets = array();
-  $configs = config_get_names_with_prefix('flexslider.optionset.');
-  foreach ($configs as $file) {
-    $config = config($file)->get();
-    $name = str_replace('flexslider.optionset.', '', $file);
-    $optionsets[$name] = flexslider_optionset_create($config);
-  }
-
-  return $optionsets;
-}
-
-/**
  * Read: Fetches the given optionset and creates the settings array.
  *
  * @param $name
@@ -626,6 +603,26 @@ function flexslider_optionset_load($name) {
   }
 
   return NULL;
+}
+
+/**
+ * Read: Fetches all optionsets.
+ *
+ * @return array
+ *   An associative array of optionset arrays.
+ *
+ * @see flexslider_optionset_create().
+ */
+function flexslider_optionset_load_all() {
+  $optionsets = array();
+  $configs = config_get_names_with_prefix('flexslider.optionset.');
+  foreach ($configs as $file) {
+    $config = config($file)->get();
+    $name = str_replace('flexslider.optionset.', '', $file);
+    $optionsets[$name] = flexslider_optionset_create($config);
+  }
+
+  return $optionsets;
 }
 
 /**

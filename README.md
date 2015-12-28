@@ -1,6 +1,7 @@
 FlexSlider
 ==========
-Integrates the FlexSlider library for views, fields, and more.
+
+Integrates the FlexSlider responsive slideshow library with Backdrop CMS.
 
 
 Installation
@@ -21,11 +22,13 @@ License
 This project is GPL v2 software. See the LICENSE.txt file in this directory for
 complete text.
 
+
 Current Maintainers
 -------------------
 
 - Jen Lampton (https://github.com/jenlampton)
 - Mathew Winstone (https://github.com/minorOffense)
+
 
 Credits
 -------
