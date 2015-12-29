@@ -1,0 +1,5 @@
+[FlexsliderTestCase]
+name = FlexSlider tests
+description = Test the FlexSlider presets, configuration options and permission controls.
+group = FlexSlider
+file = flexslider.test

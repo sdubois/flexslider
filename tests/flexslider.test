@@ -1,56 +1,44 @@
 <?php
-
 /**
  * @file
  * Test cases for FlexSlider
- *
- * @author Mathew Winstone <mwinstone@coldfrontlabs.ca>
  */
 
-
-class FlexsliderTestCase extends DrupalWebTestCase {
+class FlexsliderTestCase extends backdropWebTestCase {
   protected $admin_user;
   protected $any_user;
-
-  public static function getInfo() {
-    return array(
-      'name' => t('FlexSlider tests'),
-      'description' => t('Test the FlexSlider presets, configuration options and permission controls.'),
-      'group' => t('FlexSlider'),
-    );
-  }
 
   function setUp() {
     parent::setUp('libraries', 'ctools', 'flexslider');
 
     // Create users
-    $this->admin_user = $this->drupalCreateUser(array('administer flexslider'));
-    $this->any_user = $this->drupalCreateuser(array('access administration pages'));
+    $this->admin_user = $this->backdropCreateUser(array('administer flexslider'));
+    $this->any_user = $this->backdropCreateuser(array('access administration pages'));
   }
 
   function testAdminAccess() {
 
     // Login as the admin user
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Load admin page
-    $this->drupalGet('admin/config/media/flexslider');
+    $this->backdropGet('admin/config/media/flexslider');
     $this->assertResponse(200, t('Administrative permission allows access to administration page.'));
 
     // Logout as admin user
-    $this->drupalLogout();
+    $this->backdropLogout();
 
     // Login as any user
-    $this->drupalLogin($this->any_user);
+    $this->backdropLogin($this->any_user);
 
     // Attempt to load admin page
-    $this->drupalGet('admin/config/media/flexslider');
+    $this->backdropGet('admin/config/media/flexslider');
     $this->assertResponse(403, t('Regular users do not have access to administrative pages.'));
   }
 
   function testOptionSetCrud() {
     // Login as the admin user
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     $testsets  = array('testset', 'testset2');
 
     foreach ($testsets as $name) {
@@ -121,23 +109,23 @@ class FlexsliderTestCase extends DrupalWebTestCase {
   function testOptionSetForm() {
 
     // Login with admin user
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // ------------ Test Option Set Add ------------ //
     // Load create form
-    $this->drupalGet('admin/config/media/flexslider/add');
+    $this->backdropGet('admin/config/media/flexslider/add');
     $this->assertResponse(200, t('Administrative user can reach the "Add" form.'));
 
     // Save new optionset
     $optionset = array();
     $optionset['title'] = 'testset';
     $optionset['name'] = 'testset';
-    $this->drupalPost('admin/config/media/flexslider/add', $optionset, t('Save'));
+    $this->backdropPost('admin/config/media/flexslider/add', $optionset, t('Save'));
     $this->assertResponse(200);
     $this->assertText('testset has been created.', t('Successfully saved the new optionset "testset"'));
 
     // Attempt to save option set of the same name again
-    $this->drupalPost('admin/config/media/flexslider/add', $optionset, t('Save'));
+    $this->backdropPost('admin/config/media/flexslider/add', $optionset, t('Save'));
     $this->assertResponse(200);
     $this->assertText("The machine-readable name is already in use. It must be unique.", t("Blocked the creation of duplicate named optionset."));
 
@@ -146,11 +134,11 @@ class FlexsliderTestCase extends DrupalWebTestCase {
     $options = _flexslider_test_options();
 
     foreach ($options['valid'] as $testset) {
-      $this->drupalPost('admin/config/media/flexslider/list/default/edit', $testset, t('Save'));
+      $this->backdropPost('admin/config/media/flexslider/list/default/edit', $testset, t('Save'));
       $this->assertResponse(200);
 
       // Test saved values loaded into form
-      $this->drupalGet('admin/config/media/flexslider/list/default/edit');
+      $this->backdropGet('admin/config/media/flexslider/list/default/edit');
       $this->assertResponse(200, t('Default optionset reloaded.'));
       foreach ($testset as $key => $option) {
         $this->assertFieldByName($key, $option, t('Value for @key appears in form correctly.', array('@key' => $key)));
@@ -161,10 +149,10 @@ class FlexsliderTestCase extends DrupalWebTestCase {
     $testset = flexslider_optionset_load('testset');
 
     // Test the delete workflow
-    $this->drupalGet("admin/config/media/flexslider/list/$testset->name/delete");
+    $this->backdropGet("admin/config/media/flexslider/list/$testset->name/delete");
     $this->assertResponse(200);
     $this->assertText("Are you sure you want to delete $testset->name?", t('Delete confirmation form loaded.'));
-    $this->drupalPost("admin/config/media/flexslider/list/$testset->name/delete", '', 'Delete');
+    $this->backdropPost("admin/config/media/flexslider/list/$testset->name/delete", '', 'Delete');
     $this->assertResponse(200);
     $this->assertText("The item has been deleted.", t('Deleted test set using form.'));
   }
