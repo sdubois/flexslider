@@ -53,7 +53,6 @@ function theme_flexslider_list_item(&$variables) {
  * Template preprocess handler for 'flexslider' theme.
  */
 function template_preprocess_flexslider(&$variables) {
-
   // Reference configuration variables
   $optionset = &$variables['settings']['optionset'];
   $settings = &$variables['settings'];
@@ -118,19 +117,18 @@ function template_preprocess_flexslider(&$variables) {
 /**
  * Process function for flexslider_list_item
  */
-function template_process_flexslider_list(&$variables) {
+function template_preprocess_flexslider_list(&$variables) {
   // Reset the list of attributes
   $variables['settings']['attributes'] = array(
     // @todo find a way to detect the outter container class if possible
     'class' => array('slides'),
   );
-
 }
 
 /**
  * Process function for flexslider_list_item
  */
-function template_process_flexslider_list_item(&$variables) {
+function template_preprocess_flexslider_list_item(&$variables) {
   // Reset the list of attributes
   $variables['settings']['attributes'] = array();
 

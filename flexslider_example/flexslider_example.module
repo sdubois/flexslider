@@ -1,13 +1,8 @@
 <?php
-
 /**
  * @file
- * Describe the file
- *
- * @author Mathew Winstone <mwinstone@coldfrontlabs.ca>
+ * Sample implementation of FlexSlider.
  */
-
-@include 'flexslider_example.features.inc';
 
 /**
  * Generate the sample content
@@ -22,9 +17,9 @@ function flexslider_example_generate_content() {
   
   foreach ($images as $image) {
     // Add the images using the Drupal File API
-    $path = drupal_get_path('module', 'flexslider') . '/assets/images/' . $image;
+    $path = backdrop_get_path('module', 'flexslider_example') . '/images/' . $image;
     $filename = $image;
-    
+
     $file_temp = file_get_contents($path);
     $file_temp - file_save_data($file_temp, 'public://' . $filename, FILE_EXISTS_RENAME);
 
