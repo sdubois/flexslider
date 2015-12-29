@@ -1,11 +1,7 @@
 <?php
-
 /**
  * @file
- * Adds fields integration with FlexSlider
- *
- * @author jepedo
- * @author Mathew Winstone <mwinstone@coldfrontlabs.ca>
+ * Provides a FlexSlider field display formatter.
  */
 
 /**
@@ -39,14 +35,15 @@ function flexslider_fields_field_formatter_info() {
       ),
     );
   }
+
   return $info;
 }
 
 /**
  * Implements hook_field_formatter_settings_form().
  *
- * Provides display settings form within the manage display page of
- * an image field with formatter flexslider.
+ * Provides display settings form within the manage display page of an image
+ * field with formatter flexslider.
  */
 function flexslider_fields_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
@@ -56,9 +53,8 @@ function flexslider_fields_field_formatter_settings_form($field, $instance, $vie
 
   // Show select box for the option set
   $optionsets = array();
-  ctools_include('export');
   foreach (flexslider_optionset_load_all() as $name => $optionset) {
-    $optionsets[$name] = check_plain($optionset->title);
+    $optionsets[$name] = check_plain($optionset['title']);
   }
 
   $form['optionset'] = array(
@@ -89,7 +85,7 @@ function flexslider_fields_field_formatter_settings_form($field, $instance, $vie
 
   if (!empty($instance['settings'])) {
     // If the image field doesn't have the Title field enabled, tell the user.
-    if ($instance['settings']['title_field'] == FALSE and $instance['bundle'] != 'ctools') {
+    if ($instance['settings']['title_field'] == FALSE) {
       $form['caption'] = array(
         '#title' => t('Choose a caption source'),
         '#type' => 'select',
@@ -99,7 +95,7 @@ function flexslider_fields_field_formatter_settings_form($field, $instance, $vie
           1 => t('Image title'),
           'alt' => t('Image ALT attribute'),
         ),
-        '#description' => t('You need to <a href="@url">enable the Title field</a> for this image field to be able use it as a caption.', array('@url' => url('admin/structure/types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'], array('fragment' => 'edit-instance-settings-title-field', 'query' => array('destination' => 'admin/structure/types/manage/' . $instance['bundle'] . '/display'))))),
+        '#description' => t('You need to <a href="@url">enable the Title field</a> to use it as a caption.', array('@url' => url('admin/structure/types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'], array('fragment' => 'edit-instance-settings-title-field', 'query' => array('destination' => 'admin/structure/types/manage/' . $instance['bundle'] . '/display'))))),
       );
     }
     else {
@@ -122,7 +118,7 @@ function flexslider_fields_field_formatter_settings_form($field, $instance, $vie
 /**
  * Implements hook_field_formatter_settings_summary().
  *
- * Displays the summary of the set options of a flexslider formatted image field
+ * Displays the summary of the options of a flexslider formatted image field.
  */
 function flexslider_fields_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
@@ -131,7 +127,6 @@ function flexslider_fields_field_formatter_settings_summary($field, $instance, $
   $summary = array();
 
   // Load option set.
-  ctools_include('export');
   if (!empty($settings['optionset'])) {
     $o = flexslider_optionset_load($settings['optionset']);
     if ($o !== NULL) {
@@ -160,7 +155,7 @@ function flexslider_fields_field_formatter_settings_summary($field, $instance, $
   }
 
   // Build settings summary.
-  $optionset = isset($optionset) ? $optionset->title : t('Default settings');
+  $optionset = isset($optionset) ? $optionset['title'] : t('Default settings');
   $summary[] = t('Option set: %optionset', array('%optionset' => $optionset));
   $summary[] = $is;
 
@@ -175,7 +170,7 @@ function flexslider_fields_field_formatter_settings_summary($field, $instance, $
 function flexslider_fields_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
 
   // If file entity formatter is selected render all files initially.
-  if ($display['type'] == 'flexslider_file_entity') {
+  if ($display['type'] == 'flexslider_file_entity' && module_exists('file_entity')) {
     $file_display = $display;
     $file_display['type'] = 'file_rendered';
     $file_items = module_invoke('file_entity', 'field_formatter_view', $entity_type, $entity, $field, $instance, $langcode, $items, $file_display);
@@ -192,7 +187,7 @@ function flexslider_fields_field_formatter_view($entity_type, $entity, $field, $
 
       // Setup the variables for calling theme_image_style
       if (isset($item['item']['uri'])) {
-        $item['slide']['path'] = $item['item']['uri'];
+        $item['slide']['uri'] = $item['item']['uri'];
       }
       if (isset($display['settings']['image_style'])) {
         $item['slide']['style_name'] = $display['settings']['image_style'];
@@ -238,10 +233,17 @@ function flexslider_fields_field_formatter_view($entity_type, $entity, $field, $
       $items[$key] = $item;
     }
 
+    $module_path = backdrop_get_path('module', 'flexslider');
+
     $element[0] = array(
       '#theme' => 'flexslider',
       '#items' => $items,
       '#settings' => $display['settings'],
+      '#attached' => array(
+        'library' => array(
+          array('flexslider', 'flexslider'),
+        ),
+      ),
     );
   }
 

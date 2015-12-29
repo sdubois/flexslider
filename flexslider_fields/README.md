@@ -1,18 +1,35 @@
-About
-=====
+FlexSlider Fields
+=================
 
-Adds a field display formatter to allow you to display field content using FlexSlider. The module doesn't require Field UI to be enabled by default (so you can leave it off once everything is configured) but it is recommended to use to setup your display settings.
+Adds a field display formatter to display multi-value field content using
+FlexSlider slideshows.
 
 Usage
-=====
+-----
 
-Manage the fields on any entity (ex: node of type Article)
+Manage the fields on any entity (ex: node of type Post)
+Example: admin/structure/types/manage/post
 
-Ex: admin/structure/types/manage/article
-
-Select any field of type "image" or "media" and set the display options to "FlexSlider". Then select your option set in the display formatter settings. That's it!
+Select any field of type "image" or "media" and set the display options to "FlexSlider". Then select the optionset in the display formatter settings. 
 
 File Entity Integration
-=======================
+-----------------------
 
-The module integrates with the [File Entity module](https://www.drupal.org/project/file_entity). Select "FlexSlider File Entity" formatter to use your file entity display modes for you slide layout.
+The FlexSlider Fields module integrates with the [File Entity module](https://www.drupal.org/project/file_entity). Select "FlexSlider File Entity" formatter to use your file entity display modes for you slide layout.
+
+Note: The Backdrop CMS support for file_entity is currently untested.
+
+
+License
+-------
+
+This project is GPL v2 software. See the LICENSE.txt file in the parent module
+directory for complete text.
+
+Credits
+-------
+
+- Ported to Backdrop CMS by Jen Lampton (https://github.com/jenlampton).
+- Maintained and maintained for Drupal by Mathew Winstone (https://github.com/minorOffense).
+- Additional author credit to jepedo.
+- Based on Wootheme's FlexSlider project (https://github.com/woothemes/FlexSlider).

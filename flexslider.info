@@ -1,5 +1,5 @@
 name = FlexSlider
-description = FlexSlider responsive slideshows.
+description = A light-weight responsive slideshow tool.
 core = 7.x
 backdrop = 1.x
 package = FlexSlider
