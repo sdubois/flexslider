@@ -148,8 +148,7 @@ function flexslider_option_elements($options = array()) {
 
   $form['animation_slideshow']['slideshow'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Slideshow'),
-    '#description' => t('Animate the slides automatically'),
+    '#title' => t('Animate the slides automatically (slideshow).'),
     '#default_value' => isset($options['slideshow']) ? $options['slideshow'] : _flexslider_optionset_defaults('slideshow'),
   );
 
@@ -170,19 +169,19 @@ function flexslider_option_elements($options = array()) {
 
   $form['animation_slideshow']['smoothHeight'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Animate the height of the slider smoothly for slides of varying height.'),
+    '#title' => t('Animate the height of the slider smoothly for slides of varying height (smoothHeight).'),
     '#default_value' => isset($options['smoothHeight']) ? $options['smoothHeight'] : _flexslider_optionset_defaults('smoothHeight'),
   );
 
   $form['animation_slideshow']['reverse'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Reverse the animation direction.'),
+    '#title' => t('Reverse the animation direction (reverse).'),
     '#default_value' => isset($options['reverse']) ? $options['reverse'] : _flexslider_optionset_defaults('reverse'),
   );
 
   $form['animation_slideshow']['slideshowSpeed'] = array(
     '#type' => 'number',
-    '#title' => t('Cycle speed'),
+    '#title' => t('Slideshow cycle speed (slideshowSpeed)'),
     '#field_suffix' => t('milliseconds'),
     '#element_validate' => array('_flexslider_validate_positive_integer'),
     '#default_value' => isset($options['slideshowSpeed']) ? $options['slideshowSpeed'] : _flexslider_optionset_defaults('slideshowSpeed'),
@@ -196,7 +195,7 @@ function flexslider_option_elements($options = array()) {
 
   $form['animation_slideshow']['randomize'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Randomize slide order.'),
+    '#title' => t('Randomize slide order (randomize).'),
     '#default_value' => isset($options['randomize']) ? $options['randomize'] : _flexslider_optionset_defaults('randomize'),
   );
   $form['animation_slideshow']['startAt'] = array(
@@ -220,8 +219,8 @@ function flexslider_option_elements($options = array()) {
   );
   $form['animation_slideshow']['itemMargin'] = array(
     '#type' => 'number',
-    '#title' => t('Item Margin'),
-    '#description' => t('Margin between carousel items. (This margin must also be set with CSS. This property merely informs FlexSlider of the CSS margin.)'),
+    '#title' => t('Margin between carousel items.'),
+    '#description' => t('This margin must also be set with CSS. (This property merely informs FlexSlider of the CSS margin.)'),
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => isset($options['itemMargin']) ? $options['itemMargin'] : _flexslider_optionset_defaults('itemMargin'),
@@ -254,7 +253,7 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['directionNav'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Add controls for previous/next navigation'),
+    '#title' => t('Show controls for previous/next navigation'),
     '#default_value' => isset($options['directionNav']) ? $options['directionNav'] : _flexslider_optionset_defaults('directionNav'),
   );
   $form['nav_controls']['prevText'] = array(
@@ -279,7 +278,7 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['pausePlay'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Add Pause/Play indicator'),
+    '#title' => t('Show Pause/Play indicator'),
     '#default_value' => isset($options['pausePlay']) ? $options['pausePlay'] : _flexslider_optionset_defaults('pausePlay'),
   );
   $form['nav_controls']['pauseText'] = array(
@@ -304,18 +303,18 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['pauseOnAction'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Pause the slideshow when interacting with control elements.'),
+    '#title' => t('Pause the slideshow when interacting with control elements (pauseOnAction).'),
     '#default_value' => isset($options['pauseOnAction']) ? $options['pauseOnAction'] : _flexslider_optionset_defaults('pauseOnAction'),
   );
   $form['nav_controls']['pauseOnHover'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Pause the slideshow when hovering over slider, then resume when no longer hovering.'),
+    '#title' => t('Pause the slideshow when hovering over slider, then resume when no longer hovering (pauseOnHover).'),
     '#default_value' => isset($options['pauseOnHover']) ? $options['pauseOnHover'] : _flexslider_optionset_defaults('pauseOnHover'),
   );
   $form['nav_controls']['controlNav'] = array(
     '#type' => 'select',
     '#title' => t('Paging controls to jump to individual slides.'),
-    '#description' => t('Set to "On" if using Manual controls (under Advanced Options).'),
+    '#description' => t('Set to "Numeric pager" if using <em>Manual controls</em> (under Advanced Options).'),
     '#default_value' => isset($options['controlNav']) ? $options['controlNav'] : _flexslider_optionset_defaults('controlNav'),
     '#options' => array(
       0 => t('Off'),
@@ -325,8 +324,8 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['thumbCaptions'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Thumbnail Captions'),
-    '#description' => t('<em>Requires FlexSlider Library 2.2+</em>. Captions will be added to thumbnails and removed from the main slide.'),
+    '#title' => t('Add captions to thumbnails and remove them from the main slides (thumbCaptions).'),
+    '#description' => t('<em>Requires FlexSlider Library 2.2+</em>.'),
     '#default_value' => isset($options['thumbCaptions']) ? $options['thumbCaptions'] : _flexslider_optionset_defaults('thumbCaptions'),
     '#states' => array(
       'visible' => array(
@@ -337,8 +336,8 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['thumbCaptionsBoth'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Display both thumbnail captions and normal captions'),
-    '#description' => t('<em>Requires FlexSlider Library 2.2+</em>. Display captions in the thumbnail as well as in the main slide.'),
+    '#title' => t('Display both thumbnail captions and normal captions (thumbCaptionsBoth).'),
+    '#description' => t('<em>Requires FlexSlider Library 2.2+</em>.'),
     '#default_value' => isset($options['thumbCaptionsBoth']) ? $options['thumbCaptionsBoth'] : _flexslider_optionset_defaults('thumbCaptionsBoth'),
     '#states' => array(
       'visible' => array(
@@ -349,23 +348,23 @@ function flexslider_option_elements($options = array()) {
   );
   $form['nav_controls']['keyboard'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow keyboard navigation (left/right arrow keys).'),
+    '#title' => t('Allow keyboard navigation with left/right arrow keys (keyboard).'),
     '#default_value' => isset($options['keyboard']) ? $options['keyboard'] : _flexslider_optionset_defaults('keyboard'),
   );
   $form['nav_controls']['multipleKeyboard'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow keyboard navigation to affect multiple sliders.'),
+    '#title' => t('Allow keyboard navigation to affect multiple sliders (multipleKeyboard).'),
     '#default_value' => isset($options['multipleKeyboard']) ? $options['multipleKeyboard'] : _flexslider_optionset_defaults('multipleKeyboard'),
   );
   $form['nav_controls']['mousewheel'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow mousewheel navigation.'),
+    '#title' => t('Allow mousewheel navigation (mousewheel).'),
     '#default_value' => isset($options['mousewheel']) ? $options['mousewheel'] : _flexslider_optionset_defaults('mousewheel'),
     // @todo add check for jquery mousewheel library
   );
   $form['nav_controls']['touch'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow touch swipe navigation.'),
+    '#title' => t('Allow touch swipe navigation (touch).'),
     '#default_value' => isset($options['touch']) ? $options['touch'] : _flexslider_optionset_defaults('touch'),
   );
 
@@ -377,7 +376,7 @@ function flexslider_option_elements($options = array()) {
   $form['advanced']['namespace'] = array(
     '#type' => 'textfield',
     '#title' => t('Namespace'),
-    '#description' => t('Prefix for the classes of all elements generated by the plugin.'),
+    '#description' => t('Prefix for the classes of all elements generated by FlexSlider.'),
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => isset($options['namespace']) ? $options['namespace'] : _flexslider_optionset_defaults('namespace'),
@@ -385,7 +384,7 @@ function flexslider_option_elements($options = array()) {
   $form['advanced']['selector'] = array(
     '#type' => 'textfield',
     '#title' => t('Selector'),
-    '#description' => t('Selector must match a simple pattern. "{container} > {slide}".'),
+    '#description' => t('Must match a simple pattern, for example: <code>{container} > {slide}</code>.'),
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => isset($options['selector']) ? $options['selector'] : _flexslider_optionset_defaults('selector'),
@@ -428,13 +427,13 @@ function flexslider_option_elements($options = array()) {
   $form['advanced']['controlsContainer'] = array(
     '#type' => 'textfield',
     '#title' => t('Controls container'),
-    '#description' => t('Declare which container the navigation elements should be appended to. Default container is the flexSlider element. Example use would be ".flexslider-container", "#container", etc.'),
+    '#description' => t('Declare which container the navigation elements should be appended to. Default container is the flexSlider element. Example use would be <code>.flexslider-container</code>, <code>#container</code>, etc.'),
     '#default_value' => isset($options['controlsContainer']) ? $options['controlsContainer'] : _flexslider_optionset_defaults('controlsContainer'),
   );
   $form['advanced']['manualControls'] = array(
     '#type' => 'textfield',
     '#title' => t('Manual controls'),
-    '#description' => t('Declare custom control navigation. Example would be ".flex-control-nav li" or "#tabs-nav li img", etc. The number of elements in your controlNav should match the number of slides/tabs.'),
+    '#description' => t('Declare custom control navigation. Example would be <code>.flex-control-nav li</code> or <code>#tabs-nav li img</code>, etc. The number of elements in your controlNav should match the number of slides/tabs. Note: <em>Paging controls</em> must be set to "Numeric pager" (under Navigation and controls).'),
     '#default_value' => isset($options['manualControls']) ? $options['manualControls'] : _flexslider_optionset_defaults('manualControls'),
   );
 
