@@ -7,7 +7,9 @@
  */
 
 /**
- * Add a preprocessor to prepare data from FlexSlider Views
+ * Prepares variables for flexslider views templates.
+ *
+ * @see flexslider-views.tpl.php.
  */
 function template_preprocess_flexslider_views(&$variables) {
   // Only run the preprocessor if it is a view
