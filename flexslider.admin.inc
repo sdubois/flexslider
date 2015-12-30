@@ -621,7 +621,7 @@ function _flexslider_get_operations($optionset) {
     'title' => t('Clone'),
     'href' => 'admin/config/media/flexslider/clone/' . $optionset['name'],
   );
-  if ($optionset['storage'] == FLEXSLIDER_STORAGE_DEFAULT) {
+  if ($optionset['storage'] == FLEXSLIDER_STORAGE_CUSTOM) {
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => 'admin/config/media/flexslider/delete/' . $optionset['name'],
