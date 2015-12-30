@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * flexslider style plugin for the Views module.
+ * FlexSlider style plugin for the Views module.
  */
 
 /**
@@ -36,7 +36,7 @@ class flexslider_views_plugin_style_flexslider extends views_plugin_style {
 
     $optionsets = array();
     foreach (flexslider_optionset_load_all() as $name => $optionset) {
-      $optionsets[$name] = check_plain($optionset->title);
+      $optionsets[$name] = check_plain($optionset['title']);
     }
     $form['flexslider']['optionset'] = array(
       '#title' => t('Option set'),
@@ -44,11 +44,6 @@ class flexslider_views_plugin_style_flexslider extends views_plugin_style {
       '#options' => $optionsets,
       '#default_value' => $this->options['optionset'],
     );
-
-    $link_options = array('' => t('None'));
-    foreach ($this->view->display_handler->get_handlers('field') as $field => $handler) {
-      $link_options[$field] = $handler->ui_name();
-    }
 
     $captionfield_options = array('' => t('None'));
     foreach ($this->view->display_handler->get_handlers('field') as $field => $handler) {
@@ -78,14 +73,14 @@ class flexslider_views_plugin_style_flexslider extends views_plugin_style {
    */
   function options_submit(&$form, &$form_state) {
     $options =& $form_state['values']['style_options'];
-    
+
     // In some cases, namely when the style settings are overriden for this display,
     // the flexslider options aren't in a sub array. No idea why. But this
     // prevents a fatal error.
     if (!empty($options['flexslider'])) {
       // Pull the fieldset values one level up
       $options += $options['flexslider'];
-      unset($options['flexslider']);      
+      unset($options['flexslider']);
     }
   }
 
@@ -96,6 +91,9 @@ class flexslider_views_plugin_style_flexslider extends views_plugin_style {
 
     // Group the rows according to the grouping field, if specified.
     $sets = $this->render_grouping($this->view->result, $this->options['grouping']);
+
+    // Add the flexslider JS to the page.
+    backdrop_add_library('flexslider', 'flexslider');
 
     // Render each group separately and concatenate.
     $output = '';

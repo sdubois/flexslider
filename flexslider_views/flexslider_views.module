@@ -1,10 +1,7 @@
 <?php
-
 /**
  * @file
- * Adds Views plugins for FlexSlider
- *
- * @author Mathew Winstone <mwinstone@coldfrontlabs.ca>
+ * Provides a FlexSlider views style plugin.
  */
 
 /**
@@ -13,5 +10,16 @@
 function flexslider_views_views_api() {
   return array(
     'api' => 3,
+    'path' => backdrop_get_path('module', 'flexslider_views') . '/views',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function flexslider_views_autoload_info() {
+  return array(
+    // Views handlers:
+    'flexslider_views_plugin_style_flexslider' => 'views/flexslider_views_plugin_style_flexslider.inc'
   );
 }
