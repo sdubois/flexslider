@@ -8,9 +8,5 @@ type = module
 ; Dependencies
 dependencies[] = image
 
-; Files
-files[] = theme/flexslider.theme.inc
-files[] = flexslider.test
-
 ; Configuration link
 configure = admin/config/media/flexslider
