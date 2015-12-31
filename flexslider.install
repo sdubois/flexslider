@@ -5,65 +5,6 @@
  */
 
 /**
- * Implements hook_install().
- *
- * Adds a 'default' option set for fresh installs.
- */
-function flexslider_install() {
-  // Do nothing for now
-}
-
-/**
- * Implements hook_uninstall().
- */
-function flexslider_uninstall() {
-  // Do nothing for now
-}
-
-/**
- * Implements hook_requirements().
- */
-function flexslider_requirements($phase) {
-  $requirements = array();
-  // Ensure translations don't break at install time
-  $t = get_t();
-
-  // Check to see if the flexslider library is available
-  if ($phase == 'runtime') {
-    $library = libraries_detect('flexslider');
-
-    if ($library['installed']) {
-      $version = explode('.', $library['version']);
-
-      if ($version[0] == FLEXSLIDER_COMPATIBLE_MAJOR_VERSION) {
-        $requirements['flexslider'] = array(
-          'value' => $library['version'],
-          'severity' => REQUIREMENT_OK,
-        );
-      }
-      else {
-        $requirements['flexslider'] = array(
-          'value' => $library['version'],
-          'description' => $t('Incompatible version detected. The FlexSlider library version must be from the %version.x branch.', array('%version' => FLEXSLIDER_COMPATIBLE_MAJOR_VERSION)),
-          'severity' => REQUIREMENT_WARNING,
-        );
-      }
-    }
-    else {
-      $requirements['flexslider'] = array(
-        'value' => $t('FlexSlider library not found.'),
-        'description' => $t('The FlexSlider library could not be detected. Please consult the README.md for installation instructions.'),
-        'severity' => REQUIREMENT_ERROR,
-      );
-    }
-
-    $requirements['flexslider']['title'] = $t('FlexSlider');
-  }
-
-  return $requirements;
-}
-
-/**
  * Implements hook_update_N().
  *
  * Update variables to config.
