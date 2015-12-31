@@ -535,7 +535,7 @@ function flexslider_form_optionset_edit_submit($form, &$form_state) {
   flexslider_optionset_save($optionset);
 
   // Set a friendly message.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  backdrop_set_message(t('@title configuration has been saved.', array('@title' => $optionset['title'])));
 }
 
 /**
@@ -557,7 +557,7 @@ function flexslider_optionset_form_delete($form, &$form_state, $optionset) {
   // Deleting an export in code will revert it.
   $op = (isset($optionset['overridden']) && $optionset['overridden']) ? 'Revert' : 'Delete';
 
-  $question = t('Are you sure you want to @action the option set %name?', array('@action' => t(backdrop_strtolower($op)), '%name' => $optionset['name']));
+  $question = t('Are you sure you want to @action the optionset @title?', array('@action' => backdrop_strtolower($op), '@title' => $optionset['title']));
   $path = 'admin/config/media/flexslider';
   $description = NULL;
 
@@ -579,7 +579,7 @@ function flexslider_optionset_form_delete_submit($form, &$form_state) {
     flexslider_optionset_delete($optionset);
   }
 
-  backdrop_set_message(t('Option set %name was ' . $op . '.', array('%name' => $optionset['name'])));
+  backdrop_set_message(t('Optionset @title has been ' . $op . '.', array('@title' => $optionset['title'])));
   $form_state['redirect'] = 'admin/config/media/flexslider';
 }
 
