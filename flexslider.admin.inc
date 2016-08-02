@@ -616,10 +616,12 @@ function _flexslider_get_operations($optionset) {
     'title' => t('Edit'),
     'href' => 'admin/config/media/flexslider/edit/' . $optionset['name'],
   );
+  /* @todo - restore clone ability
   $links['clone'] = array(
     'title' => t('Clone'),
     'href' => 'admin/config/media/flexslider/clone/' . $optionset['name'],
   );
+  */
   if ($optionset['storage'] == FLEXSLIDER_STORAGE_CUSTOM) {
     $links['delete'] = array(
       'title' => t('Delete'),
