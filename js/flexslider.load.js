@@ -30,11 +30,9 @@
   /**
    * Initialize the flexslider instance
    */
-
   function _flexslider_init(id, optionset, context) {
     $('#' + id, context).once('flexslider', function() {
       // Remove width/height attributes
-      // @todo load the css path from the settings
       $(this).find('ul.slides > li *').removeAttr('width').removeAttr('height');
 
       if (optionset) {
