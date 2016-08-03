@@ -213,14 +213,16 @@ function flexslider_option_elements($options = array()) {
 
   $form['animation_slideshow']['itemWidth'] = array(
     '#type' => 'number',
-    '#title' => t('Item Width'),
-    '#description' => t('Box-model width of individual carousel items, including horizontal borders and padding.'),
+    '#title' => t('Carousel item CSS width'),
+    '#field_suffix' => t('pixels'),
+    '#description' => t('Box-model width of individual carousel items, including horizontal borders and padding. (This value must also be set with CSS. Setting informs FlexSlider of the width.)'),
     '#default_value' => isset($options['itemWidth']) ? $options['itemWidth'] : _flexslider_optionset_defaults('itemWidth'),
   );
   $form['animation_slideshow']['itemMargin'] = array(
     '#type' => 'number',
-    '#title' => t('Margin between carousel items.'),
-    '#description' => t('This margin must also be set with CSS. (This property merely informs FlexSlider of the CSS margin.)'),
+    '#title' => t('Carousel item CSS margin'),
+    '#field_suffix' => t('pixels'),
+    '#description' => t('Margin between carousel items. (This value must also be set with CSS. Setting informs FlexSlider of the CSS margin.)'),
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => isset($options['itemMargin']) ? $options['itemMargin'] : _flexslider_optionset_defaults('itemMargin'),
