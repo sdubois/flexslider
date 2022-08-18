@@ -129,16 +129,16 @@ class FlexsliderTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $this->assertText("The machine-readable name is already in use. It must be unique.", t("Blocked the creation of duplicate named optionset."));
 
-    // ------------ Test Option Set Edit ------------ //
+    // ------------ Test Option Set Configure ------------ //
     // Attempt to save each option value
     $options = _flexslider_test_options();
 
     foreach ($options['valid'] as $testset) {
-      $this->backdropPost('admin/config/media/flexslider/edit/default', $testset, t('Save'));
+      $this->backdropPost('admin/config/media/flexslider/configure/default', $testset, t('Save'));
       $this->assertResponse(200);
 
       // Test saved values loaded into form
-      $this->backdropGet('admin/config/media/flexslider/edit/default');
+      $this->backdropGet('admin/config/media/flexslider/configure/default');
       $this->assertResponse(200, t('Default optionset reloaded.'));
       foreach ($testset as $key => $option) {
         $this->assertFieldByName($key, $option, t('Value for @key appears in form correctly.', array('@key' => $key)));
