@@ -111,7 +111,7 @@ class flexslider_views_plugin_style_flexslider extends views_plugin_style {
           'view' => $this->view,
           'options' => $this->options,
           'rows' => $rows,
-          'title' => $title
+          'title' => $title,
         )
       );
     }
