@@ -96,7 +96,7 @@ function flexslider_optionset_list() {
 }
 
 /**
- * Defines the form elements used to edit the FlexSlider library options
+ * Defines the form elements used to configure the FlexSlider library options
  *
  * @param array $options [optional]
  *  Pass in a set of default values for the options
@@ -443,7 +443,7 @@ function flexslider_option_elements($options = array()) {
 }
 
 /**
- * Form builder: Form to add or edit an option set.
+ * Form builder: Form to add or configure an option set.
  */
 function flexslider_form_optionset_edit($form, &$form_state, $optionset = array()) {
   // If the form has failed validation, don't loose the changes.
@@ -498,7 +498,7 @@ function flexslider_form_optionset_edit($form, &$form_state, $optionset = array(
 }
 
 /**
- * Submit handler for optionset add/edit form.
+ * Submit handler for optionset add/configure form.
  */
 function flexslider_form_optionset_edit_submit($form, &$form_state) {
   // Redirect to list page.
@@ -614,9 +614,9 @@ function _flexslider_validate_minimum_version_22($element, &$form_state) {
 function _flexslider_get_operations($optionset) {
   $links = array();
 
-  $links['edit'] = array(
-    'title' => t('Edit'),
-    'href' => 'admin/config/media/flexslider/edit/' . $optionset['name'],
+  $links['configure'] = array(
+    'title' => t('Configure'),
+    'href' => 'admin/config/media/flexslider/configure/' . $optionset['name'],
   );
   /* @todo - restore clone ability
   $links['clone'] = array(

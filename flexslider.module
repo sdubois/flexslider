@@ -128,12 +128,19 @@ function flexslider_menu() {
     'type' => MENU_LOCAL_ACTION,
   ) + $base;
 
-  $items['admin/config/media/flexslider/edit/%flexslider_optionset'] = array(
-    'title' => 'Edit optionset',
-    'description' => 'Edit a Flexslider optionset',
+  $items['admin/config/media/flexslider/configure/%flexslider_optionset'] = array(
+    'title' => 'Configure optionset',
+    'description' => 'Configure a Flexslider optionset',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('flexslider_form_optionset_edit', 5),
     'weight' => -10,
+  ) + $base;
+
+  // @deprecated: Remove backwards-compatibility redirect for Backdrop 2.x.
+  $items['admin/config/media/flexslider/edit/%flexslider_optionset'] = array(
+    'page callback' => 'system_redirect_deprecated_page',
+    'page arguments' => array('admin/config/media/flexslider/configure/%flexslider_optionset'),
+    'type' => MENU_CALLBACK,
   ) + $base;
 
   $items['admin/config/media/flexslider/clone/%flexslider_optionset'] = array(
