@@ -111,6 +111,10 @@ function flexslider_fields_field_formatter_settings_form($field, $instance, $vie
       );
     }
   }
+  
+  if (module_exists('image_field_caption')) {
+    $form['caption']['#options']['image_field_caption'] = t('Image Field Caption');
+  }
 
   return $form;
 }
@@ -228,6 +232,9 @@ function flexslider_fields_field_formatter_view($entity_type, $entity, $field, $
       }
       elseif ($display['settings']['caption'] === 'alt') {
         $item['caption'] = filter_xss($item['item']['alt']);
+      }
+      elseif ($display['settings']['caption'] === 'image_field_caption' && module_exists('image_field_caption') && isset($item['item']['image_field_caption']['value'])) {
+        $item['caption'] = $item['item']['image_field_caption']['value'];
       }
 
       $items[$key] = $item;
